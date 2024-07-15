@@ -69,24 +69,56 @@ def create_kernel():
         
         kernel[kernel == 0] = -1
 
-        return kernel, kernelHeight, KernelWidth
+        return kernel, kernelHeight, kernelWidth
 
 def pad(img, kernelHeight, kernelWidth):
     padX = kernelWidth // 2
     padY = kernelHeight // 2
-    paddedImage = np.pad(img, pad_width=padX, pad_height=padY)
+    paddedImage = np.pad(img, pad_width=((padY, padY), (padX, padX)), mode='constant', constant_values=0)
 
     return paddedImage
 
 def erode(img, kernel, kernelHeight, kernelWidth):
-    # imgHeight, imgWidth = img.shape
-    pass
+    padX = kernelWidth // 2
+    padY = kernelHeight // 2
+    
+    imgHeight, imgWidth = img.shape
+
+    paddedImage = pad(img, kernelHeight, kernelWidth)
+    erodedImage = np.zeros_like(img, dtype=np.uint8)
+
+    for i in range(padY, imgHeight + padY):
+        for j in range(padX, imgWidth + padX):
+            roi = paddedImage[i-padY:i+padY+1, j-padX:j+padX+1]
+            if np.all(roi[kernel == 1]):
+                erodedImage[i-padY, j-padX] = 255
+
+    return erodedImage
+
 
 def dilate(img, kernel, kernelHeight, kernelWidth):
-    pass
+    padX = kernelWidth // 2
+    padY = kernelHeight // 2
+
+    imgHeight, imgWidth = img.shape
+    
+    paddedImage = pad(img, kernelHeight, kernelWidth)
+    dilatedImage = np.zeros_like(img, dtype=np.uint8)
+
+    for i in range(padY, imgHeight + padY):
+        for j in range(padX, imgWidth + padX):
+            roi = paddedImage[i-padY:i+padY+1, j-padX:j+padX+1]
+            if np.any(roi[kernel > 0]):
+                dilatedImage[i-padY, j-padX] = 255
+
+    return dilatedImage
 
 def opening(img, kernel, kernelHeight, kernelWidth):
-    pass
+    erodedImage = erode(img, kernel, kernelHeight, kernelWidth)
+    openedImage = dilate(erodedImage, kernel, kernelHeight, kernelWidth)
+    return openedImage
 
 def closing(img, kernel, kernelHeight, kernelWidth):
-    pass
+    dilatedImage = dilate(img, kernel, kernelHeight, kernelWidth)
+    closedImage = erode(dilatedImage, kernel, kernelHeight, kernelWidth)
+    return closedImage
