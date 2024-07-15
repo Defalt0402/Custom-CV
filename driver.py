@@ -1,9 +1,16 @@
 import cv2, struct
 import numpy as np
-from customCV import read_mnist
+from customCV import read_mnist, create_kernel
 
 ## Index in list is same as digit it represents
 numberIndices = [10, 2, 1, 18, 4, 15, 11, 0, 61, 9]
+
+## Default text parametres
+font = cv2.FONT_HERSHEY_SIMPLEX
+font_scale = 1
+font_color = (50, 50, 255)  # White color in BGR format
+thickness = 1
+
 
 def get_kernel():
     while True:
@@ -47,13 +54,20 @@ def cv_dilate():
     kernelHeight, kernelWidth = kernel.shape
 
     for i in range(len(numberIndices)):
-        allNumbersImage[imgHeight:2*imgHeight, i*imgWidth:(i+1)*imgWidth] = cv2.dilate(images[numberIndices[i]], kernel)
+        allNumbersImage[3*imgHeight:4*imgHeight, i*imgWidth:(i+1)*imgWidth] = cv2.dilate(images[numberIndices[i]], kernel)
+
+    text = "Dilated Digits:"
+    org = (imgWidth, 3*imgHeight - 2)
+    cv2.putText(allNumbersImage, text, org, font, font_scale, font_color, thickness)
+
 
     cv2.namedWindow(f'All digits dilated, kernel ({kernelWidth},{kernelHeight})', cv2.WINDOW_NORMAL)
     cv2.resizeWindow(f'All digits dilated, kernel ({kernelWidth},{kernelHeight})', 1400, 280)  
     cv2.imshow(f'All digits dilated, kernel ({kernelWidth},{kernelHeight})', allNumbersImage)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
+
+    allNumbersImage[2*imgHeight:3*imgHeight, 0:10*imgWidth] = 0
 
     test_loop()
 
@@ -63,11 +77,19 @@ def cv_erode():
     kernelHeight, kernelWidth = kernel.shape
 
     for i in range(len(numberIndices)):
-        allNumbersImage[imgHeight:2*imgHeight, i*imgWidth:(i+1)*imgWidth] = cv2.erode(images[numberIndices[i]], kernel)
+        allNumbersImage[3*imgHeight:4*imgHeight, i*imgWidth:(i+1)*imgWidth] = cv2.erode(images[numberIndices[i]], kernel)
 
+    text = "Eroded Digits:"
+    org = (imgWidth, 3*imgHeight - 2)
+    cv2.putText(allNumbersImage, text, org, font, font_scale, font_color, thickness)
+
+    cv2.namedWindow(f'All digits eroded, kernel ({kernelWidth},{kernelHeight})', cv2.WINDOW_NORMAL)
+    cv2.resizeWindow(f'All digits eroded, kernel ({kernelWidth},{kernelHeight})', 1400, 280)  
     cv2.imshow(f'All digits eroded, kernel ({kernelWidth},{kernelHeight})', allNumbersImage)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
+
+    allNumbersImage[2*imgHeight:3*imgHeight, 0:10*imgWidth] = 0
 
     test_loop()
 
@@ -77,11 +99,20 @@ def cv_opening():
     kernelHeight, kernelWidth = kernel.shape
 
     for i in range(len(numberIndices)):
-        allNumbersImage[imgHeight:2*imgHeight, i*imgWidth:(i+1)*imgWidth] = cv2.morphologyEx(images[numberIndices[i]], cv2.MORPH_OPEN, kernel)
+        allNumbersImage[3*imgHeight:4*imgHeight, i*imgWidth:(i+1)*imgWidth] = cv2.morphologyEx(images[numberIndices[i]], cv2.MORPH_OPEN, kernel)
 
+    text = "Opened Digits:"
+    org = (imgWidth, 3*imgHeight - 2)
+    cv2.putText(allNumbersImage, text, org, font, font_scale, font_color, thickness)
+
+    cv2.namedWindow(f'All digits opened, kernel ({kernelWidth},{kernelHeight})', cv2.WINDOW_NORMAL)
+    cv2.resizeWindow(f'All digits opened, kernel ({kernelWidth},{kernelHeight})', 1400, 280)  
     cv2.imshow(f'All digits opened, kernel ({kernelWidth},{kernelHeight})', allNumbersImage)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
+
+    allNumbersImage[2*imgHeight:3*imgHeight, 0:10*imgWidth] = 0
+
 
     test_loop()
 
@@ -91,17 +122,45 @@ def cv_closing():
     kernelHeight, kernelWidth = kernel.shape
 
     for i in range(len(numberIndices)):
-        allNumbersImage[imgHeight:2*imgHeight, i*imgWidth:(i+1)*imgWidth] = cv2.morphologyEx(images[numberIndices[i]], cv2.MORPH_CLOSE, kernel)
+        allNumbersImage[3*imgHeight:4*imgHeight, i*imgWidth:(i+1)*imgWidth] = cv2.morphologyEx(images[numberIndices[i]], cv2.MORPH_CLOSE, kernel)
 
-    cv2.imshow(f'All digits opened, kernel ({kernelWidth},{kernelHeight})', allNumbersImage)
+    text = "Closed Digits:"
+    org = (imgWidth, 3*imgHeight - 2)
+    cv2.putText(allNumbersImage, text, org, font, font_scale, font_color, thickness)
+
+    cv2.namedWindow(f'All digits closed, kernel ({kernelWidth},{kernelHeight})', cv2.WINDOW_NORMAL)
+    cv2.resizeWindow(f'All digits closed, kernel ({kernelWidth},{kernelHeight})', 1400, 280)  
+    cv2.imshow(f'All digits closed, kernel ({kernelWidth},{kernelHeight})', allNumbersImage)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
 
+    allNumbersImage[2*imgHeight:3*imgHeight, 0:10*imgWidth] = 0
+
     test_loop()
+
+def comparison_loop():
+    print("_____________________________________________________")
+    print("Compare openCV functions to custom functions. Choose options: \n<1> Dilate \n<2> Erode \n<3> Open \n<4> Close \n<5> Test Only OpenCV functions \n<6> Exit Program")
+    choice = input()
+    if choice == "1":
+        compare_dilate()
+    elif choice == "2":
+        compare_erode()
+    elif choice == "3":
+        compare_opening()
+    elif choice == "4":
+        compare_closing()
+    elif choice == "5":
+        test_loop()
+    elif choice == "6":
+        exit()
+    else:
+        print(f"{choice} is not a valid option. \n")
+        test_loop()   
 
 def test_loop():
     print("_____________________________________________________")
-    print("Test openCV functions. Choose options: \n<1> Dilate \n<2> Erode \n<3> Open \n<4> Close \n<5> Exit Program")
+    print("Testing openCV functions. Choose options: \n<1> Dilate \n<2> Erode \n<3> Open \n<4> Close \n<5> Compare Custom functions performance \n<6> Exit Program")
     choice = input()
     if choice == "1":
         cv_dilate()
@@ -112,6 +171,8 @@ def test_loop():
     elif choice == "4":
         cv_closing()
     elif choice == "5":
+        comparison_loop()
+    elif choice == "6":
         exit()
     else:
         print(f"{choice} is not a valid option. \n")
@@ -139,9 +200,13 @@ numImages, imgHeight, imgWidth = images.shape
 # cv2.destroyAllWindows()
 
 ## Getting one of each character
-allNumbersImage = np.zeros((2*imgHeight, 10 * imgWidth), dtype=np.uint8)
+allNumbersImage = np.zeros((4*imgHeight, 10 * imgWidth), dtype=np.uint8)
 for i in range(len(numberIndices)):
-    allNumbersImage[0:imgHeight, i*imgWidth:(i+1)*imgWidth] = images[numberIndices[i]]
+    allNumbersImage[imgHeight:2*imgHeight, i*imgWidth:(i+1)*imgWidth] = images[numberIndices[i]]
+
+text = "Original Digits:"
+org = (imgWidth, imgHeight - 2)
+cv2.putText(allNumbersImage, text, org, font, font_scale, font_color, thickness)
 
 
 # cv2.imshow('One of each digit', allNumbersImage)
