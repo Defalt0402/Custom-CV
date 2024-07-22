@@ -161,3 +161,7 @@ def fill_holes(img):
         result = np.bitwise_or(fullFilledImage, img)
     
     return result
+
+def find_holes(img):
+    filledImage = fill_holes(img)
+    return filledImage - img
