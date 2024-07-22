@@ -78,7 +78,7 @@ def pad(img, kernelHeight, kernelWidth):
 
     return paddedImage
 
-def erode(img, kernel, kernelHeight, kernelWidth):
+def erode(img, kernel=np.ones((3, 3), dtype=np.uint8), kernelHeight=3, kernelWidth=3):
     padX = kernelWidth // 2
     padY = kernelHeight // 2
     
@@ -96,7 +96,7 @@ def erode(img, kernel, kernelHeight, kernelWidth):
     return erodedImage
 
 
-def dilate(img, kernel, kernelHeight, kernelWidth):
+def dilate(img, kernel=np.ones((3, 3), dtype=np.uint8), kernelHeight=3, kernelWidth=3):
     padX = kernelWidth // 2
     padY = kernelHeight // 2
 
@@ -113,12 +113,51 @@ def dilate(img, kernel, kernelHeight, kernelWidth):
 
     return dilatedImage
 
-def opening(img, kernel, kernelHeight, kernelWidth):
+def opening(img, kernel=np.ones((3, 3), dtype=np.uint8), kernelHeight=3, kernelWidth=3):
     erodedImage = erode(img, kernel, kernelHeight, kernelWidth)
     openedImage = dilate(erodedImage, kernel, kernelHeight, kernelWidth)
     return openedImage
 
-def closing(img, kernel, kernelHeight, kernelWidth):
+def closing(img, kernel=np.ones((3, 3), dtype=np.uint8), kernelHeight=3, kernelWidth=3):
     dilatedImage = dilate(img, kernel, kernelHeight, kernelWidth)
     closedImage = erode(dilatedImage, kernel, kernelHeight, kernelWidth)
     return closedImage
+
+def binarize(img, threshold=127):
+    binaryImage = (img > threshold).astype(np.uint8) * 255
+    return binaryImage
+
+def fill_holes(img):
+    invertedImage = cv2.bitwise_not(img)
+    
+    numLabels, labels, stats, centroids = cv2.connectedComponentsWithStats(invertedImage, connectivity=8)
+    
+    background = np.argmax(stats[1:, 4]) + 1  # +1 to adjust for skipping the first component
+    holes = []
+
+    for i in range(1, numLabels):
+        if i == background:
+            continue  # Skip background
+        
+        x, y, w, h, area = stats[i]
+        centroidX, centroidY = centroids[i]
+        
+        holes.append((int(centroidY), int(centroidX)))
+
+    fullFilledImage = np.zeros_like(img, dtype=np.uint8)
+    for centroid in holes:
+        filledImage = np.zeros_like(img, dtype=np.uint8)
+        filledImage[centroid[0], centroid[1]] = 255
+        
+        while True:
+            dilation = dilate(filledImage)
+            newFilledImage = np.bitwise_and(dilation, invertedImage)
+
+            if np.array_equal(filledImage, newFilledImage):
+                fullFilledImage = np.bitwise_or(fullFilledImage, filledImage)
+                break
+            filledImage = newFilledImage
+        
+        result = np.bitwise_or(fullFilledImage, img)
+    
+    return result
