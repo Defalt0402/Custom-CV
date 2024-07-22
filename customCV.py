@@ -130,14 +130,12 @@ def binarize(img, threshold=127):
 def fill_holes(img):
     invertedImage = cv2.bitwise_not(img)
     
-    numLabels2, labels2, stats2, centroids2 = cv2.connectedComponentsWithStats(invertedImage, connectivity=8)
     numLabels, labels, stats, centroids = CCA(invertedImage)
-
     print(stats)
-    print(stats2)
     
     background = np.argmax(stats[0:, 4])  # +1 to adjust for skipping the first component
     holes = []
+    
 
     for i in range(1, numLabels):
         if i == background:
@@ -164,6 +162,8 @@ def fill_holes(img):
         
         result = np.bitwise_or(fullFilledImage, img)
     
+    result = np.bitwise_or(fullFilledImage, img)
+    
     return result
 
 def find_holes(img):
@@ -176,9 +176,9 @@ def CCA(img, connectivity=8):
     labels = []
     equivalence = {}
     blobs = np.zeros((imgHeight+2, imgWidth+2),  dtype=np.uint8)
-    for y in range(imgHeight):
-        for x in range(imgWidth):
-            if img[y][x] == 0:
+    for y in range(1, imgHeight+1):
+        for x in range(1, imgWidth+1):
+            if img[y-1][x-1] == 0:
                 continue
             
             roi = blobs[y-1:y+1, x-1:x+1]
