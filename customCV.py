@@ -130,9 +130,13 @@ def binarize(img, threshold=127):
 def fill_holes(img):
     invertedImage = cv2.bitwise_not(img)
     
-    numLabels, labels, stats, centroids = cv2.connectedComponentsWithStats(invertedImage, connectivity=8)
+    numLabels2, labels2, stats2, centroids2 = cv2.connectedComponentsWithStats(invertedImage, connectivity=8)
+    numLabels, labels, stats, centroids = CCA(invertedImage)
+
+    print(stats)
+    print(stats2)
     
-    background = np.argmax(stats[1:, 4]) + 1  # +1 to adjust for skipping the first component
+    background = np.argmax(stats[0:, 4])  # +1 to adjust for skipping the first component
     holes = []
 
     for i in range(1, numLabels):
@@ -147,7 +151,7 @@ def fill_holes(img):
     fullFilledImage = np.zeros_like(img, dtype=np.uint8)
     for centroid in holes:
         filledImage = np.zeros_like(img, dtype=np.uint8)
-        filledImage[centroid[0], centroid[1]] = 255
+        filledImage[centroid[0]][centroid[1]] = 255
         
         while True:
             dilation = dilate(filledImage)
@@ -165,3 +169,97 @@ def fill_holes(img):
 def find_holes(img):
     filledImage = fill_holes(img)
     return filledImage - img
+
+def CCA(img, connectivity=8):
+    imgHeight, imgWidth = img.shape
+
+    labels = []
+    equivalence = {}
+    blobs = np.zeros((imgHeight+2, imgWidth+2),  dtype=np.uint8)
+    for y in range(imgHeight):
+        for x in range(imgWidth):
+            if img[y][x] == 0:
+                continue
+            
+            roi = blobs[y-1:y+1, x-1:x+1]
+            if connectivity == 4:
+                if roi[0][1] != 0 or roi[1][0] != 0 or roi[1][2] != 0 or roi[2][1] != 0:
+                    values = [roi[0][1], roi[1][0], roi[1][2], roi[2][1]]
+                    if 0 in values:
+                        values.np.remove(0)
+                    minVal = min(values)
+
+                    for val in values:
+                        if minVal != val:
+                            if val in equivalence:
+                                equivalence[val].append(minVal)
+                            else:
+                                equivalence[val] = [minVal]
+
+                    blobs[y][x] = minVal
+                else:
+                    if not labels:
+                        blobs[y][x] = 1
+                        labels.append(1)
+                    else:
+                        blobs[y][x] = max(labels) + 1
+                        labels.append(max(labels) + 1)
+            else:
+                if np.any(roi != 0):
+                    values = roi[roi != 0]
+
+                    minVal = min(values)
+
+                    for val in values:
+                        if minVal != val:
+                            if val in equivalence:
+                                equivalence[val].append(minVal)
+                            else:
+                                equivalence[val] = [minVal]
+
+                    blobs[y][x] = minVal
+                else:
+                    if not labels:
+                        blobs[y][x] = 1
+                        labels.append(1)
+                    else:
+                        blobs[y][x] = max(labels) + 1
+                        labels.append(max(labels) + 1)
+
+    blobs = blobs[1:-1, 1:-1]
+
+    for y in range(imgHeight - 1):
+        for x in range(imgWidth - 1):
+            if blobs[y][x] > 0:
+                currentLabel = blobs[y][x]
+                while currentLabel in equivalence:
+                    currentLabel = min(equivalence[currentLabel])
+                blobs[y][x] = currentLabel
+
+    labels = np.unique(blobs)
+    labels = labels[labels != 0]
+    numLabels = len(labels)
+
+    centroids = []
+    stats = []
+
+    for i in range(numLabels):
+        blob = (blobs == labels[i])
+
+        # Find the coordinates of all pixels with the current label
+        yCoords, xCoords = np.nonzero(blob)
+        ## x y width height area
+        stats.append([min(xCoords), min(yCoords), (max(xCoords) - min(xCoords)), (max(yCoords) - min(yCoords)), np.count_nonzero(blob)])
+
+        # Compute the centroid
+        if len(yCoords) > 0:  # Avoid division by zero
+            centroid_x = int(np.mean(xCoords))
+            centroid_y = int(np.mean(yCoords))
+            centroids.append([centroid_x, centroid_y])
+
+    return numLabels, labels, np.array(stats), centroids
+
+    
+    
+    
+
