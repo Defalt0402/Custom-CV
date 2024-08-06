@@ -410,20 +410,23 @@ def find_topmost_right_pixel(img):
 # Returns 0 is stem is below blob, 1 if above, None is otherwise
 def find_stem(img):
     holes = find_holes(img)
+    filledImg = fill_holes(img)
     _, _, _, centroids = CCA(holes)
-    if not len(centroids) == 0:
+    if len(centroids) != 0:
         y = centroids[0][1]
 
-        dilatedHole = dilate(holes)
-        stemImg = img - dilatedHole
+        closedFilledImg = closing(filledImg)
+        stemImg = img - closedFilledImg
         stemImg = dilate(stemImg)
-        _, _, _, centroids = CCA(stemImg)
-        y2 = centroids[0][1]
-
-        if y > y2:
-            return 0
         
-        return 1
+        _, _, _, centroids = CCA(stemImg)
+        if len(centroids) != 0:
+            y2 = centroids[0][1]
+
+            if y > y2:
+                return 0
+            
+            return 1
     
     return None
 
