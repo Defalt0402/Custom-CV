@@ -324,3 +324,17 @@ def set_pixel(img, x, y, colour, thickness):
         for j in range(-thickness//2, thickness//2):
             if 0 <= x + i < img.shape[1] and 0 <= y + j < img.shape[0]:
                 img[y + j][x + i] = colour
+
+
+def draw_rect(img, x1, y1, x2, y2, colour=255, thickness=1):
+    imgRect = np.copy(img)
+    lines = [[x1, y1, x2, y1], #top
+             [x1, y1, x1, y2], #left
+             [x1, y2, x2, y2], #bottom
+             [x2, y1, x2, y2]] #right
+    
+    for line in lines:
+        imgRect = draw_line(imgRect, line[0], line[1], line[2], line[3], colour, thickness)
+
+    return imgRect
+

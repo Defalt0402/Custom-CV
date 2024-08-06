@@ -28,7 +28,7 @@ cv2.putText(allNumbersImage, text, org, font, font_scale, font_color, thickness)
 
 for i in range(len(numberIndices)):
     x1, y1, x2, y2 = bounding_box(images[numberIndices[i]])
-    allNumbersImage[3*imgHeight:4*imgHeight, i*imgWidth:(i+1)*imgWidth] = draw_line(images[numberIndices[i]], x1, y1, x2, y2)
+    allNumbersImage[3*imgHeight:4*imgHeight, i*imgWidth:(i+1)*imgWidth] = draw_rect(images[numberIndices[i]], x1, y1, x2, y2)
 
 text = "Bounded Digits:"
 org = (imgWidth, 3*imgHeight - 2)
