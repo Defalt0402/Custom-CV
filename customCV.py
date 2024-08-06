@@ -360,7 +360,8 @@ def find_rightmost_pixel(img):
     for x in range(width - 1, -1, -1):
         column = img[:, x]
         if np.any(column > 0): 
-            y = np.argmax(column > 0)
+            y = np.argmax(column[::-1] > 0)
+            y = height - 1 - y
             return x, y
 
     return None  # Return None if no foreground pixel is found
