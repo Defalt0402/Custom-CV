@@ -1,6 +1,6 @@
 import cv2, struct
 import numpy as np
-from customCV import read_mnist, create_kernel, erode, dilate, opening, closing, fill_holes, binarize, find_holes, CCA
+from customCV import *
 
 ## Index in list is same as digit it represents
 numberIndices = [10, 2, 1, 18, 4, 15, 11, 0, 61, 9]
@@ -27,14 +27,14 @@ org = (imgWidth, imgHeight - 2)
 cv2.putText(allNumbersImage, text, org, font, font_scale, font_color, thickness)
 
 for i in range(len(numberIndices)):
-    closed = closing(images[numberIndices[i]])
-    allNumbersImage[3*imgHeight:4*imgHeight, i*imgWidth:(i+1)*imgWidth] = find_holes(closed)
+    x1, y1, x2, y2 = bounding_box(images[numberIndices[i]])
+    allNumbersImage[3*imgHeight:4*imgHeight, i*imgWidth:(i+1)*imgWidth] = cv2.rectangle(images[numberIndices[i]], (x1, y1), (x2, y2), 255, 1)
 
-text = "filled Digits:"
+text = "Bounded Digits:"
 org = (imgWidth, 3*imgHeight - 2)
 cv2.putText(allNumbersImage, text, org, font, font_scale, font_color, thickness)
 
-cv2.namedWindow(f'Filled digits', cv2.WINDOW_NORMAL)
-cv2.resizeWindow(f'Filled digits', 1400, 560)  
-cv2.imshow(f'Filled digits', allNumbersImage)
+cv2.namedWindow(f'Bounded digits', cv2.WINDOW_NORMAL)
+cv2.resizeWindow(f'Bounded digits', 1400, 560)  
+cv2.imshow(f'Bounded digits', allNumbersImage)
 cv2.waitKey(0)

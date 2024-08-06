@@ -90,6 +90,10 @@ def erode(img, kernel=np.ones((3, 3), dtype=np.uint8), kernelHeight=3, kernelWid
     for i in range(padY, imgHeight + padY):
         for j in range(padX, imgWidth + padX):
             roi = paddedImage[i-padY:i+padY+1, j-padX:j+padX+1]
+            if kernelWidth % 2 == 0:
+                roi = roi[:, :-1]
+            if kernelHeight % 2 == 0:
+                roi = roi[:-1, :]
             if np.all(roi[kernel == 1]):
                 erodedImage[i-padY, j-padX] = 255
 
@@ -108,6 +112,10 @@ def dilate(img, kernel=np.ones((3, 3), dtype=np.uint8), kernelHeight=3, kernelWi
     for i in range(padY, imgHeight + padY):
         for j in range(padX, imgWidth + padX):
             roi = paddedImage[i-padY:i+padY+1, j-padX:j+padX+1]
+            if kernelWidth % 2 == 0:
+                roi = roi[:, :-1]
+            if kernelHeight % 2 == 0:
+                roi = roi[:-1, :]
             if np.any(roi[kernel > 0]):
                 dilatedImage[i-padY, j-padX] = 255
 
@@ -136,6 +144,9 @@ def fill_holes(img):
     background = np.argmax(stats[0:, 4])  # +1 to adjust for skipping the first component
     holes = []
     
+    # kernelHeight = 2
+    # kernelWidth = 2
+    # kernel = np.ones((kernelHeight, kernelWidth), np.uint8)
 
     for i in range(1, numLabels):
         if i == background:
@@ -147,6 +158,7 @@ def fill_holes(img):
         holes.append((int(centroidY), int(centroidX)))
 
     fullFilledImage = np.zeros_like(img, dtype=np.uint8)
+
     for centroid in holes:
         filledImage = np.zeros_like(img, dtype=np.uint8)
         filledImage[centroid[0]][centroid[1]] = 255
@@ -259,7 +271,17 @@ def CCA(img, connectivity=8):
 
     return numLabels, labels, np.array(stats), centroids
 
-    
-    
-    
+
+def bounding_box(img):
+    foregroundCoords = np.column_stack(np.where(img > 0))
+
+    if foregroundCoords.size == 0:
+        return None
+
+    minY, minX = np.min(foregroundCoords, axis=0)
+    maxY, maxX = np.max(foregroundCoords, axis=0)
+
+    return minX, minY, maxX, maxY
+
+
 
