@@ -26,22 +26,8 @@ text = "Original Digits:"
 org = (imgWidth, imgHeight - 2)
 cv2.putText(allNumbersImage, text, org, font, font_scale, font_color, thickness)
 
-test = np.array([[0, 0, 0, 0],
-        [1, 0, 0, 0],
-        [1, 0, 0, 0],
-        [0, 0, 0, 0]])
-
-column = test[:, 0]
-print(np.argmax(column[::-1] > 0))
-
 for i in range(len(numberIndices)):
-    height, width = images[numberIndices[i]].shape
-    topHalfCrop = images[numberIndices[i]][0:height//2, :]
-    bottomHalfCrop = images[numberIndices[i]][height//2:, :]
-    x1, y1 = find_topmost_left_pixel(topHalfCrop)
-    x2, y2 = find_rightmost_high_pixel(topHalfCrop)
-    # y2 += height//2
-    allNumbersImage[3*imgHeight:4*imgHeight, i*imgWidth:(i+1)*imgWidth] = draw_line(images[numberIndices[i]], x1, y1, x2, y2, colour=127)
+    print(find_stem(images[numberIndices[i]]))
 
 text = "Bounded Digits:"
 org = (imgWidth, 3*imgHeight - 2)

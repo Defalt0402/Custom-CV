@@ -139,7 +139,6 @@ def fill_holes(img):
     invertedImage = cv2.bitwise_not(img)
     
     numLabels, labels, stats, centroids = CCA(invertedImage)
-    print(stats)
     
     background = np.argmax(stats[0:, 4])  # +1 to adjust for skipping the first component
     holes = []
@@ -338,10 +337,6 @@ def draw_rect(img, x1, y1, x2, y2, colour=255, thickness=1):
 
     return imgRect
 
-
-
-
-
 def find_leftmost_high_pixel(img):
     height, width = img.shape
 
@@ -411,3 +406,25 @@ def find_topmost_right_pixel(img):
             return x, y
 
     return None  # Return None if no foreground pixel is found
+
+# Returns 0 is stem is below blob, 1 if above, None is otherwise
+def find_stem(img):
+    holes = find_holes(img)
+    _, _, _, centroids = CCA(holes)
+    if not len(centroids) == 0:
+        y = centroids[0][1]
+
+        dilatedHole = dilate(holes)
+        stemImg = img - dilatedHole
+        stemImg = dilate(stemImg)
+        _, _, _, centroids = CCA(stemImg)
+        y2 = centroids[0][1]
+
+        if y > y2:
+            return 0
+        
+        return 1
+    
+    return None
+
+
