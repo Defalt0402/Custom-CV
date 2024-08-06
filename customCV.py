@@ -365,3 +365,14 @@ def find_rightmost_pixel(img):
             return x, y
 
     return None  # Return None if no foreground pixel is found
+
+def find_topmost_pixel(img):
+    height, width = img.shape
+
+    for y in range(height):
+        row = img[y, :]
+        if np.any(row > 0): 
+            x = np.argmax(row > 0)
+            return x, y
+
+    return None  # Return None if no foreground pixel is found
