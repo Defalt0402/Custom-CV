@@ -283,5 +283,37 @@ def bounding_box(img):
 
     return minX, minY, maxX, maxY
 
+## Uses Bresenham line drawing algorithm
+def draw_line(img, x1, y1, x2, y2):
+    dx = abs(x2 - x1)
+    dy = abs(y2 - y1)
+    #step directions
+    sx = 1 if x1 < x2 else -1
+    sy = 1 if y1 < y2 else -1
 
+    # Horizontal
+    if dx > dy:
+        err = dx // 2
+        while x1 != x2:
+            img[y1][x1] = 255
+            err -= dy
+            if err < 0:
+                y1 += sy
+                err += dx
+            x1 += sx
+            img[y1][x1] = 255
+    # Vertical
+    else:
+        err = dy // 2
+        while y1 != y2:
+            img[y1][x1] = 255
+            err -= dx
+            if err < 0:
+                x1 += sx
+                err += dy
+            y1 += sy
+            img[y1][x1] = 255
+
+    return img
+  
 
