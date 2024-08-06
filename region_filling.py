@@ -38,9 +38,9 @@ for i in range(len(numberIndices)):
     height, width = images[numberIndices[i]].shape
     topHalfCrop = images[numberIndices[i]][0:height//2, :]
     bottomHalfCrop = images[numberIndices[i]][height//2:, :]
-    x1, y1 = find_topmost_pixel(topHalfCrop)
-    x2, y2 = find_rightmost_pixel(bottomHalfCrop)
-    y2 += height//2
+    x1, y1 = find_topmost_left_pixel(topHalfCrop)
+    x2, y2 = find_rightmost_high_pixel(topHalfCrop)
+    # y2 += height//2
     allNumbersImage[3*imgHeight:4*imgHeight, i*imgWidth:(i+1)*imgWidth] = draw_line(images[numberIndices[i]], x1, y1, x2, y2, colour=127)
 
 text = "Bounded Digits:"

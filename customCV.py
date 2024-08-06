@@ -342,7 +342,7 @@ def draw_rect(img, x1, y1, x2, y2, colour=255, thickness=1):
 
 
 
-def find_leftmost_pixel(img):
+def find_leftmost_high_pixel(img):
     height, width = img.shape
 
     for x in range(width):
@@ -353,8 +353,31 @@ def find_leftmost_pixel(img):
 
     return None  # Return None if no foreground pixel is found
 
+def find_leftmost_low_pixel(img):
+    height, width = img.shape
 
-def find_rightmost_pixel(img):
+    for x in range(width):
+        column = img[:, x]
+        if np.any(column > 0): 
+            y = np.argmax(column[::-1] > 0)
+            y = height - 1 - y
+            return x, y
+
+    return None  # Return None if no foreground pixel is found
+
+
+def find_rightmost_high_pixel(img):
+    height, width = img.shape
+
+    for x in range(width - 1, -1, -1):
+        column = img[:, x]
+        if np.any(column > 0): 
+            y = np.argmax(column > 0)
+            return x, y
+
+    return None  # Return None if no foreground pixel is found
+
+def find_rightmost_low_pixel(img):
     height, width = img.shape
 
     for x in range(width - 1, -1, -1):
@@ -366,13 +389,25 @@ def find_rightmost_pixel(img):
 
     return None  # Return None if no foreground pixel is found
 
-def find_topmost_pixel(img):
+def find_topmost_left_pixel(img):
     height, width = img.shape
 
     for y in range(height):
         row = img[y, :]
         if np.any(row > 0): 
             x = np.argmax(row > 0)
+            return x, y
+
+    return None  # Return None if no foreground pixel is found
+
+def find_topmost_right_pixel(img):
+    height, width = img.shape
+
+    for y in range(height):
+        row = img[y, :]
+        if np.any(row > 0): 
+            x = np.argmax(row[::-1] > 0)
+            x = width - 1 - x
             return x, y
 
     return None  # Return None if no foreground pixel is found
